@@ -1,0 +1,38 @@
+name: SmokeTest Pipeline
+
+on:
+  push:
+    branches: [ main ]
+  pull_request:
+    branches: [ main ]
+
+jobs:
+  build-and-test:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout código
+        uses: actions/checkout@v3
+
+      - name: Garantir permissões de execução para os binários
+        run: |
+          chmod +x node_modules/.bin/*
+          chmod +x ./node_modules/.bin/cypress-parallel
+          chmod +x ./node_modules/.bin/cypress
+
+      - name: Instalar Node.js
+        uses: actions/setup-node@v3
+        with:
+          node-version: '22'
+
+      - name: Instalar dependências
+        run: npm install
+
+      - name: Instalar binário do Cypress
+        run: npx cypress install
+        
+      - name: Limpar relatórios
+        run: rm -rf cypress/reports/*.json cypress/reports/*.html cypress/reports/merged-report.json
+
+      - name: Rodar os testes
+        run: npx cypress run
